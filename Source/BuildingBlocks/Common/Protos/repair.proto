@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option csharp_namespace = "RepairProto";
+
+package RepairProto;
+
+import public "team.proto";
+
+service RepairGrpc {
+	rpc StartRepairProcess (StartRepairDto) returns (Empty);
+	rpc EndRepairProcess (EndRepairDto) returns (Empty);
+	rpc GetByPole (ID) returns (History);
+	rpc GetByTeam (ID) returns (History);
+}
+
+message Empty {}
+
+message ID {
+	string id = 1;
+}
+
+message StartRepairDto {
+	string poleId = 1;
+}
+
+message EndRepairDto {
+	string repairId = 1;
+	bool success = 2;
+}
+
+message History {
+	repeated RepairDto data = 1;
+}
+
+message RepairDto {
+	string id = 1;
+	string poleId = 2;
+	string teamId = 3;
+	TeamProto.TeamDetailsDto team = 4;
+	string startDate = 5;
+	string endDate = 6;
+	bool isSuccessful = 7;
+	bool isFinished = 8;
+}

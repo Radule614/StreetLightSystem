@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+option csharp_namespace = "UserProto";
+
+package UserProto;
+
+service UserGrpc {
+	rpc GetAll (Empty) returns (Users);
+	rpc GetById (ID) returns (UserDto);
+	rpc Create (CreateDto) returns (Empty);
+	rpc Update (UpdateDto) returns (Empty);
+	rpc Delete (ID) returns (Empty);
+	rpc GetByAuthEmail (Email) returns (UserAuthDto);
+	rpc GetUserData (Empty) returns (UserDto);
+	rpc GetAllByIds (IdCollection) returns (Users);
+}
+
+message Empty {}
+
+message Users {
+	repeated UserDto data = 1;
+}
+
+message UserDto {
+	string id = 1;
+	string email = 2;
+	string firstName = 3;
+	string lastName = 4;
+	repeated RoleDto roles = 5;
+}
+
+message RoleDto {
+	string name = 1;
+}
+
+message ID {
+	string id = 1;
+}
+
+message IdCollection {
+	repeated string ids = 1;
+}
+
+message CreateDto {
+	string email = 1;
+	string firstName = 2;
+	string lastName = 3;
+	string password = 4;
+}
+
+message UpdateDto {
+	string id = 1;
+	string firstName = 2;
+	string lastName = 3;
+	string email = 4;
+	string password = 5;
+}
+
+message Email {
+	string email = 1;
+}
+
+message UserAuthDto {
+	string id = 1;
+	string password = 2;
+	repeated string permissions = 3;
+}

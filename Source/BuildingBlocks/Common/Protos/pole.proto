@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option csharp_namespace = "PoleProto";
+
+package PoleProto;
+
+service PoleGrpc {
+	rpc GetAll (Empty) returns (Poles);
+	rpc GetByID (ID) returns (PoleDTO);
+	rpc Create (CreateDTO) returns (ID);
+	rpc Update (UpdateDTO) returns (Empty);
+	rpc Delete (ID) returns (Empty);
+	rpc UpdateStatus (UpdateStatusDTO) returns (Empty);
+
+	//No authentication, should not be exposed to the outside.
+	rpc UnsecuredGetAll(Empty) returns (Poles);
+}
+
+message Empty {}
+
+message Poles {
+	repeated PoleDTO data = 1;
+}
+
+message ID {
+	string id = 1;
+}
+
+message PoleDTO {
+	string id = 1;
+	int32 status = 2;
+	double latitude = 3;
+	double longitude = 4;
+}
+
+message CreateDTO {
+	double latitude = 1;
+	double longitude = 2;
+}
+
+message UpdateDTO {
+	string id = 1;
+	int32 status = 2;
+	double latitude = 3;
+	double longitude = 4;
+}
+
+message UpdateStatusDTO {
+	string id = 1;
+	int32 status = 2;
+}

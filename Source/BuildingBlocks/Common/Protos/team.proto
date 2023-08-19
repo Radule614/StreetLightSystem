@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+option csharp_namespace = "TeamProto";
+
+package TeamProto;
+
+service TeamGrpc {
+	rpc GetAll (Empty) returns (Teams);
+	rpc GetById (ID) returns (TeamDetailsDto);
+	rpc Create (CreateDto) returns (Empty);
+	rpc Update (UpdateDto) returns (Empty);
+	rpc Delete (ID) returns (Empty);
+	rpc GetPossibleMembers (Empty) returns (Members);
+	rpc GetUserTeam (Empty) returns (TeamDto);
+	rpc GetByIdList (IdList) returns (Teams);
+}
+
+message Empty {}
+
+message ID {
+	string id = 1;
+}
+
+message IdList {
+	repeated string ids = 1;
+}
+
+message CreateDto {
+	string name = 1;
+	repeated string memberIds = 2;
+}
+
+message UpdateDto {
+	string id = 1;
+	string name = 2;
+	repeated string memberIds = 3;
+}
+
+message Teams {
+	repeated TeamDetailsDto data = 1;
+}
+
+message TeamDto {
+	string id = 1;
+	string name = 2;
+}
+
+message TeamDetailsDto {
+	string id = 1;
+	string name = 2;
+	repeated MemberDto members = 3;
+}
+
+message Members {
+	repeated MemberDetailsDto data = 1;
+}
+
+message MemberDto {
+	string id = 1;
+	string firstName = 2;
+	string lastName = 3;
+}
+
+message MemberDetailsDto {
+	string id = 1;
+	string firstName = 2;
+	string lastName = 3;
+	TeamDto team = 4;
+}

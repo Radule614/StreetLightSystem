@@ -1,0 +1,255 @@
+version: "3.8"
+
+services:
+  api_gateway:
+    image: api_gateway
+    container_name: api_gateway
+    hostname: api_gateway
+    build:
+      context: .
+      dockerfile: ApiGateway/ApiGateway/Dockerfile
+    restart: on-failure
+    ports:
+      - "11000:11000"
+    environment:
+      - USER_SERVICE_ADDRESS=user_service:12000
+      - AUTH_SERVICE_ADDRESS=auth_service:12000
+      - POLE_SERVICE_ADDRESS=pole_service:12000
+      - TEAM_SERVICE_ADDRESS=team_service:12000
+      - REPAIR_SERVICE_ADDRESS=repair_service:12000
+      - NOTIFICATION_SERVICE_ADDRESS=notification_service:12000
+    depends_on:
+      - user_service
+      - auth_service
+      - pole_service
+      - team_service
+      - repair_service
+      - notification_service
+
+  user_service:
+    image: user_service
+    container_name: user_service
+    hostname: user_service
+    build:
+      context: .
+      dockerfile: Services/User/User.API/Dockerfile
+    restart: on-failure
+    environment:
+      - DATABASE_ADDRESS=user_database:5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - AUTH_SERVICE_ADDRESS=auth_service:12000
+      - NOTIFICATION_SERVICE_ADDRESS=notification_service:12000
+      - EVENT_QUEUE_ADDRESS=event_queue:5672
+    depends_on:
+      - user_database
+      - event_queue
+    ports:
+      - 12000:12000
+
+  user_database:
+    image: postgres:15.0-alpine
+    container_name: user_database
+    hostname: user_database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 12100:5432
+    restart: on-failure
+
+  auth_service:
+    image: auth_service
+    container_name: auth_service
+    hostname: auth_service
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Services/Auth/Auth.API/Dockerfile
+    environment:
+      - USER_SERVICE_ADDRESS=user_service:12000
+    depends_on:
+      - user_service
+      - event_queue
+    ports:
+      - 12001:12000
+
+  pole_service:
+    image: pole_service
+    container_name: pole_service
+    hostname: pole_service
+    build:
+      context: .
+      dockerfile: Services/Pole/Pole.API/Dockerfile
+    restart: on-failure
+    environment:
+      - DATABASE_ADDRESS=pole_database:5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - AUTH_SERVICE_ADDRESS=auth_service:12000
+      - NOTIFICATION_SERVICE_ADDRESS=notification_service:12000
+      - EVENT_QUEUE_ADDRESS=event_queue:5672
+    depends_on:
+      - pole_database
+      - event_queue
+    ports:
+      - 12002:12000
+
+  pole_database:
+    image: postgres:15.0-alpine
+    container_name: pole_database
+    hostname: pole_database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 12102:5432
+    restart: on-failure
+
+  team_service:
+    image: team_service
+    container_name: team_service
+    hostname: team_service
+    build:
+      context: .
+      dockerfile: Services/Team/Team.API/Dockerfile
+    restart: on-failure
+    environment:
+      - DATABASE_ADDRESS=team_database:5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - AUTH_SERVICE_ADDRESS=auth_service:12000
+      - NOTIFICATION_SERVICE_ADDRESS=notification_service:12000
+      - EVENT_QUEUE_ADDRESS=event_queue:5672
+    ports:
+      - 12003:12000
+    depends_on:
+      - team_database
+
+  team_database:
+    image: postgres:15.0-alpine
+    container_name: team_database
+    hostname: team_database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 12103:5432
+    restart: on-failure
+
+  repair_service:
+    image: repair_service
+    container_name: repair_service
+    hostname: repair_service
+    build:
+      context: .
+      dockerfile: Services/Repair/Repair.API/Dockerfile
+    restart: on-failure
+    environment:
+      - DATABASE_ADDRESS=repair_database:5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - AUTH_SERVICE_ADDRESS=auth_service:12000
+      - NOTIFICATION_SERVICE_ADDRESS=notification_service:12000
+      - TEAM_SERVICE_ADDRESS=team_service:12000
+      - EVENT_QUEUE_ADDRESS=event_queue:5672
+    depends_on:
+      - repair_database
+      - event_queue
+    ports:
+      - 12004:12000
+
+  repair_database:
+    image: postgres:15.0-alpine
+    container_name: repair_database
+    hostname: repair_database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 12104:5432
+    restart: on-failure
+
+  notification_service:
+    image: notification_service
+    container_name: notification_service
+    hostname: notification_service
+    build:
+      context: .
+      dockerfile: Services/Notification/Notification.API/Dockerfile
+    restart: on-failure
+    environment:
+      - DATABASE_ADDRESS=notification_database:5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - API_GATEWAY_ADDRESS=api_gateway:12000
+      - USER_SERVICE_ADDRESS=user_service:12000
+      - AUTH_SERVICE_ADDRESS=auth_service:12000
+    depends_on:
+      - notification_database
+      - event_queue
+    ports:
+      - 12005:12000
+  
+  notification_database:
+    image: postgres:15.0-alpine
+    container_name: notification_database
+    hostname: notification_database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 12105:5432
+    restart: on-failure
+
+  mqtt_client:
+    image: mqtt_client
+    container_name: mqtt_client
+    hostname: mqtt_client
+    build:
+      context: .
+      dockerfile: Services/MqttClient/MqttClient/Dockerfile
+    restart: on-failure
+    environment:
+      - POLE_SERVICE_ADDRESS=pole_service:12000
+      - MQTT_BROKER_ADDRESS=mqtt_broker:1883
+    depends_on:
+      - mqtt_broker
+      - pole_service
+
+  mqtt_broker:
+    image: emqx/emqx:5.0.25
+    container_name: mqtt_broker
+    hostname: mqtt_broker
+    ports:
+      - 1883:1883
+      - 8083:8083
+      - 8084:8084
+      - 8883:8883
+      - 18083:18083
+    restart: on-failure
+
+  mqtt_simulator:
+    image: mqtt_simulator
+    container_name: mqtt_simulator
+    hostname: mqtt_simulator
+    build:
+      context: .
+      dockerfile: Services/MqttSimulator/MqttSimulator/Dockerfile
+    restart: on-failure
+    environment:
+      - POLE_SERVICE_ADDRESS=pole_service:12000
+      - MQTT_BROKER_ADDRESS=mqtt_broker:1883
+    profiles:
+      - simulator
+    depends_on:
+      - mqtt_broker
+      - pole_service
+
+  event_queue:
+    image: rabbitmq:3.12.2-management
+    container_name: event_queue
+    hostname: event_queue
+    restart: on-failure
+    ports:
+      - 15672:15672

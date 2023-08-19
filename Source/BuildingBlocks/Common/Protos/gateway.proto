@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option csharp_namespace = "GatewayProto";
+
+package GatewayProto;
+
+import public "notification.proto";
+
+service NotificationService {
+	rpc SendMessage (NotificationProto.MessageDto) returns (NotificationProto.Empty);
+	rpc SendMessages (NotificationProto.MessageList) returns (NotificationProto.Empty);
+	rpc BroadcastNotification (NotificationProto.BroadcastNotificationDto) returns (NotificationProto.Empty);
+	rpc SendNotification (NotificationProto.NotificationDto) returns (NotificationProto.Empty);
+}

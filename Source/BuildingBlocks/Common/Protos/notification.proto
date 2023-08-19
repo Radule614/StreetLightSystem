@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option csharp_namespace = "NotificationProto";
+
+package NotificationProto;
+
+service NotificationGrpc {
+	rpc SendMessage (SendMessageDto) returns (Empty);
+	rpc GetMessages (Empty) returns (MessageList);
+	rpc NotifyUnsentMessages (Empty) returns (Empty);
+	rpc BroadcastNotification (BroadcastNotificationDto) returns (Empty);
+	rpc SendNotification (NotificationDto) returns (Empty);
+}
+
+message SendMessageDto {
+	string message = 1;
+	string receiverId = 2;
+}
+
+message MessageDto {
+	string id = 1;
+	string message = 2;
+	string receiverId = 3;
+	Sender sender = 4;
+	string receivedDate = 5;
+	string sentDate = 6;
+	bool isNew = 7;
+}
+
+message BroadcastNotificationDto {
+	string message = 1;
+	string action = 2;
+}
+
+message NotificationDto {
+	string message = 1;
+	string action = 2;
+	string receiverId = 3;
+}
+
+message Empty {}
+
+message MessageList {
+	repeated MessageDto messages = 1;
+}
+
+message Sender {
+	string email = 1;
+	string firstName = 2;
+	string lastName = 3;
+}
