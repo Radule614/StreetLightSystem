@@ -5,7 +5,8 @@ import { AppState, appStore } from "../../../core/store";
 import { UserDto } from "../../../core/store/slices/userStore";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
-import { useNotification } from "../../../core/notification";
+import { notification$ } from "../../../core/notification";
+import { useSubscription } from "observable-hooks";
 
 const getInitialData = (): UserDto => {
   return {
@@ -23,7 +24,6 @@ export const UpdateUser = () => {
   const fetchUserData = appStore((state: AppState) => state.user.fetchUserData);
   const updateUser = appStore((state: AppState) => state.user.updateUser);
   const params = useParams();
-  const notification = useNotification();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -53,11 +53,11 @@ export const UpdateUser = () => {
     });
   }, [userData]);
 
-  useEffect(() => {
+  useSubscription(notification$, (notification) => {
     if (notification?.action === SuccessActions.UpdateUserSuccess) {
       navigate("/user");
     }
-  }, [navigate, notification]);
+  });
 
   const handleReset = () => {
     const data = {

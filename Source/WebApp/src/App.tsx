@@ -3,7 +3,6 @@ import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
 import axios from "axios";
 import { NotificationWrapper } from "./core/notification";
-import { Subscribe } from "@react-rxjs/core";
 
 let tokenValue: string | null = null;
 
@@ -31,10 +30,8 @@ export const App = () => {
   }, [token, fetchUserData, fetchUserTeam]);
 
   return (
-    <Subscribe>
-      <NotificationWrapper>
-        <Outlet />
-      </NotificationWrapper>
-    </Subscribe>
+    <NotificationWrapper>
+      <Outlet />
+    </NotificationWrapper>
   )
 };

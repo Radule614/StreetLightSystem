@@ -37,11 +37,8 @@ public class PoleContext : DbContext
                 Latitude = data[i],
                 Status = PoleStatus.Working
             };
-            if (i % 50 == 0)
-                pole.Status = PoleStatus.BeingRepaired;
-            if (i % 28 == 0)
+            if (i % 14 == 0)
                 pole.Status = PoleStatus.Broken;
-
             poles.Add(pole);
         }
 

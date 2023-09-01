@@ -10,14 +10,10 @@ import {
   isWarningAction,
 } from "../../shared";
 import { Subject } from "rxjs";
-import { bind } from "@react-rxjs/core";
 
-const notificationSubject$ = new Subject<Notification>();
+export const notificationSubject$ = new Subject<Notification | null>();
+export const notification$ = notificationSubject$.asObservable();
 
-export const [useNotification, notification$] = bind(
-  () => notificationSubject$.asObservable(),
-  null
-);
 
 export const NotificationWrapper = ({
   children,
@@ -31,6 +27,7 @@ export const NotificationWrapper = ({
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
+      .withAutomaticReconnect()
       .withUrl(`${process.env.REACT_APP_API_URL}/notification?userId=${userId}`)
       .build();
     connection.on("broadcast", (_: string, notification: Notification) => {
@@ -68,7 +65,7 @@ export const NotificationWrapper = ({
       .then(() => {
         checkUnsentNotifications();
       })
-      .catch((_: any) => {});
+      .catch((e) => {});
     return () => {
       connection.stop();
     };

@@ -91,6 +91,10 @@ public class RepairService : IRepairService
         {
             throw new RepairNotFoundException(repairId);
         }
+        if (repair.EndDate != null)
+        {
+            throw new RepairAlreadyFinishedException(repairId, repair.EndDate);
+        }
         repair.IsSuccessful = isSuccessful;
         repair.EndDate = DateTime.UtcNow;
         await _repairRepository.UpdateAsync(repair);

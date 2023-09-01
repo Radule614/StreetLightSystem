@@ -11,7 +11,8 @@ import {
 import { PoleDetailsModal } from "./PoleDetailsModal";
 import { PoleList } from "./PoleList";
 import { StartRepairModal } from "./StartRepairModal";
-import { useNotification } from "../../core/notification";
+import { notification$ } from "../../core/notification";
+import { useSubscription } from "observable-hooks";
 
 export const PoleRoot = () => {
   const poleData = appStore((state: AppState) => state.pole.poles.data);
@@ -21,7 +22,6 @@ export const PoleRoot = () => {
   const [areDetailsVisible, setDetailsVisible] = useState(false);
   const [isRepairVisible, setRepairVisible] = useState(false);
   const [outdated, setOutdated] = useState(false);
-  const notification = useNotification();
 
   const refreshData = () => {
     fetchPoleData();
@@ -32,7 +32,7 @@ export const PoleRoot = () => {
     fetchPoleData();
   }, [fetchPoleData]);
 
-  useEffect(() => {
+  useSubscription(notification$, (notification) => {
     switch (notification?.action) {
       case WarningActions.PoleStatusChanged:
         setOutdated(true);
@@ -44,7 +44,7 @@ export const PoleRoot = () => {
         fetchPoleData();
         break;
     }
-  }, [fetchPoleData, notification]);
+  });
 
   return (
     <section className="p-6 pb-32 relative">

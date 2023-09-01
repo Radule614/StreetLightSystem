@@ -1,9 +1,9 @@
-import { useEffect } from "react";
 import { AppState, appStore } from "../../core/store";
 import { Button, SuccessActions } from "../../shared";
 import { Modal } from "flowbite-react";
 import { twMerge } from "tailwind-merge";
-import { useNotification } from "../../core/notification";
+import { notification$ } from "../../core/notification";
+import { useSubscription } from "observable-hooks";
 
 export const EndRepairModal = ({
   repairId,
@@ -19,26 +19,35 @@ export const EndRepairModal = ({
   const endRepair = appStore(
     (state: AppState) => state.repair.endRepairProcess
   );
-  const notification = useNotification();
+
+  const handleError = (err: any) => {
+    if (err.code === "ERR_NETWORK") {
+      onClose && onClose();
+    }
+  };
 
   const onSuccess = async (e: any) => {
     e.preventDefault();
     try {
       await endRepair(repairId, true);
-    } catch (err) {}
+    } catch (err: any) {
+      handleError(err);
+    }
   };
 
   const onFailure = async (e: any) => {
     try {
       await endRepair(repairId, false);
-    } catch (err) {}
+    } catch (err: any) {
+      handleError(err);
+    }
   };
 
-  useEffect(() => {
+  useSubscription(notification$, (notification) => {
     if (notification?.action === SuccessActions.EndRepairSuccess && onClose) {
       onClose();
     }
-  }, [notification, onClose]);
+  });
 
   return (
     <Modal

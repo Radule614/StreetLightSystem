@@ -8,7 +8,6 @@ import { UserStoreType, userStore } from "./slices/userStore";
 import { AuthStoreType, authStore } from "./slices/authStore";
 import { NotificationStoreType, notificationStore } from "./slices/notificationStore";
 import { TeamStoreType, teamStore } from "./slices/teamStore";
-import { deepCopy } from "../../shared/utility";
 import { RepairStoreType, repairStore } from "./slices/repairStore";
 
 export interface AppState {
@@ -43,22 +42,7 @@ export const appStore: UseBoundStore<StoreApi<AppState>> = create(
   devtools(immer(persist(storeGenerator, {
     name: "app-store",
     merge: storeMerge,
-    partialize: (state: AppState) => {
-      const object: AppState = deepCopy(state);
-      delete object.auth.token.controller;
-      delete object.auth.user.controller;
-      delete object.user.users.controller;
-      delete object.user.userData.controller;
-      delete object.team.teams.controller;
-      delete object.team.members.controller;
-      delete object.team.teamData.controller;
-      delete object.pole.poles.controller;
-      delete object.pole.poleDetails.controller;
-      delete object.notification.messages.controller;
-      delete object.repair.teamHistory.controller;
-      delete object.repair.poleHistory.controller;
-      return object;
-    }
+    partialize: (state: AppState) => ({ auth: state.auth, general: state.general })
   })))
 )
 export interface Request<DataType> {

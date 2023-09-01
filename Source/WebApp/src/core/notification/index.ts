@@ -1,3 +1,3 @@
-import { NotificationWrapper, useNotification } from "./NotificationWrapper";
+import { NotificationWrapper, notification$ } from "./NotificationWrapper";
 
-export { NotificationWrapper, useNotification }
+export { NotificationWrapper, notification$ }

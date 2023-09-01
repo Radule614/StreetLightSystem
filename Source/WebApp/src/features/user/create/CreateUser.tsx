@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "../../../shared/components/Input";
 import { Button, SuccessActions } from "../../../shared";
 import { AppState, appStore } from "../../../core/store";
 import { UserDto } from "../../../core/store/slices/userStore";
 import { toast } from "react-toastify";
-import { useNotification } from "../../../core/notification";
 import { useNavigate } from "react-router-dom";
+import { notification$ } from "../../../core/notification";
+import { useSubscription } from "observable-hooks";
 
 const getInitialData = (): UserDto => {
   return {
@@ -20,7 +21,6 @@ export const CreateUser = () => {
   const [data, setData] = useState<UserDto>(getInitialData());
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const createUser = appStore((state: AppState) => state.user.createUser);
-  const notification = useNotification();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -34,11 +34,11 @@ export const CreateUser = () => {
     } catch (err) {}
   };
 
-  useEffect(() => {
+  useSubscription(notification$, (notification) => {
     if (notification?.action === SuccessActions.CreateUserSuccess) {
       navigate("/user");
     }
-  }, [navigate, notification]);
+  });
 
   const handleReset = () => {
     setData(getInitialData());

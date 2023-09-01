@@ -13,7 +13,7 @@ using Repair.API.Infrastructure.Data;
 namespace Repair.API.Domain.Services;
 
 public class EndRepairSagaHandler
-: SagaHandler<EndRepairSagaHandler, EndRepairCommand, EndRepairReply, EndRepairCommandType, EndRepairReplyType>
+    : SagaHandler<EndRepairSagaHandler, EndRepairCommand, EndRepairReply, EndRepairCommandType, EndRepairReplyType>
 {
     private readonly INotificationClient _notificationClient;
     private readonly IMapper _mapper;
@@ -48,6 +48,8 @@ public class EndRepairSagaHandler
     private async Task<EndRepairReply> EndRepair(EndRepairCommand command)
     {
         using var scope = _serviceProvider.CreateScope();
+        await using var dbContext = scope.ServiceProvider.GetRequiredService<RepairContext>();
+        var repairRepository = new RepairRepository(dbContext);
         using var repairService = scope.ServiceProvider.GetRequiredService<IRepairService>();
         var reply = new EndRepairReply(command);
         var data = command.RepairData;
@@ -58,6 +60,7 @@ public class EndRepairSagaHandler
             {
                 throw new InvalidArgumentException(nameof(command.RepairData), "null", "Repair Data Object");
             }
+            reply.OldRepairData = _mapper.Map<RepairData>(await repairRepository.FirstOrDefaultAsync(new RepairSpecification(data.Id)));
             var repair = await repairService.EndRepair(data.Id, data.IsSuccessful);
             reply.RepairData = _mapper.Map<RepairData>(repair);
             reply.Type = EndRepairReplyType.EndRepairSuccess;
@@ -93,8 +96,8 @@ public class EndRepairSagaHandler
         var repair = await repairRepository.FirstOrDefaultAsync(new RepairSpecification(data.Id));
         if (repair != null)
         {
-            repair.IsSuccessful = false;
-            repair.EndDate = null;
+            repair.IsSuccessful = command.OldRepairData?.IsSuccessful ?? false;
+            repair.EndDate = command.OldRepairData?.EndDate;
             await repairRepository.UpdateAsync(repair);
         }
         return reply;

@@ -12,7 +12,8 @@ import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate } from 'workbox-strategies';
+import { NetworkFirst, NetworkOnly } from 'workbox-strategies';
+import { BackgroundSyncPlugin } from 'workbox-background-sync';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -59,7 +60,7 @@ registerRoute(
   // Add in any other file extensions or routing criteria as needed.
   ({ url }) => url.origin === self.location.origin && (url.pathname.endsWith('.png') || url.pathname.endsWith('.ico')),
   // Customize this strategy as needed, e.g., by changing to CacheFirst.
-  new StaleWhileRevalidate({
+  new NetworkFirst({
     cacheName: 'images',
     plugins: [
       // Ensure that once this runtime cache reaches a maximum size the
@@ -77,4 +78,81 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Any other custom service worker logic can go here.
+const guid = '[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?';
+const cachedRoutes = [
+  {
+    route: "team",
+    cacheName: "teamList"
+  },
+  {
+    route: "team/members",
+    cacheName: "memberList"
+  },
+  {
+    route: "team/:id",
+    cacheName: "teamData"
+  },
+  {
+    route: "pole",
+    cacheName: "poleList"
+  },
+  {
+    route: "pole/:id",
+    cacheName: "poleData"
+  },
+  {
+    route: "repair/history/pole/:id",
+    cacheName: "poleHistory"
+  },
+  {
+    route: "repair/history/team/:id",
+    cacheName: "teamHistory"
+  },
+  {
+    route: "user",
+    cacheName: "userList"
+  },
+  {
+    route: "user/:id",
+    cacheName: "userData"
+  },
+  {
+    route: "notification/message",
+    cacheName: "notificationList"
+  }
+]
+for (let r of cachedRoutes) {
+  const route = `.*/api/${r.route.replace(':id', guid)}`
+  registerRoute(
+    ({ url }) => url.href.match(new RegExp(route)),
+    new NetworkFirst({
+      cacheName: r.cacheName,
+      plugins: [
+        new ExpirationPlugin({ maxEntries: 50 })
+      ]
+    }),
+    'GET'
+  )
+}
+
+const bgSyncPlugin = new BackgroundSyncPlugin('requestQueue', {
+  maxRetentionTime: 24 * 60 // Retry for max of 24 Hours (specified in minutes)
+});
+
+const repairStartRoute = new RegExp(".*/api/repair/start");
+registerRoute(
+  ({ url }) => url.href.match(repairStartRoute),
+  new NetworkOnly({
+    plugins: [bgSyncPlugin]
+  }),
+  'POST'
+);
+
+const repairEndRoute = new RegExp(".*/api/repair/end");
+registerRoute(
+  ({ url }) => url.href.match(repairEndRoute),
+  new NetworkOnly({
+    plugins: [bgSyncPlugin]
+  }),
+  'PUT'
+);

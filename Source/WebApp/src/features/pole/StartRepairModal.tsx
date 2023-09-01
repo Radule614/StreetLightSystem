@@ -1,9 +1,14 @@
 import { useEffect } from "react";
 import { AppState, appStore } from "../../core/store";
-import { Button, Loader, SuccessActions } from "../../shared";
+import {
+  Button,
+  Loader,
+  SuccessActions,
+} from "../../shared";
 import { Modal } from "flowbite-react";
 import { twMerge } from "tailwind-merge";
-import { useNotification } from "../../core/notification";
+import { notification$ } from "../../core/notification";
+import { useSubscription } from "observable-hooks";
 
 export const StartRepairModal = ({
   poleId,
@@ -24,7 +29,6 @@ export const StartRepairModal = ({
   const startRepair = appStore(
     (state: AppState) => state.repair.startRepairProcess
   );
-  const notification = useNotification();
 
   useEffect(() => {
     fetchPoleById(poleId);
@@ -34,14 +38,18 @@ export const StartRepairModal = ({
     e.preventDefault();
     try {
       await startRepair(poleId);
-    } catch (err) {}
+    } catch (err: any) {
+      if (err.code === "ERR_NETWORK") {
+        onClose && onClose();
+      }
+    }
   };
 
-  useEffect(() => {
+  useSubscription(notification$, (notification) => {
     if (notification?.action === SuccessActions.StartRepairSuccess && onClose) {
       onClose();
     }
-  }, [notification, onClose]);
+  });
 
   return (
     <Modal
@@ -55,7 +63,8 @@ export const StartRepairModal = ({
           {isLoading && <Loader className="flex justify-center py-5" />}
           {!isLoading && poleData && (
             <div>
-              Clicking start button will start repair procedure and turn the pole into `being repaired` state.
+              Clicking start button will start repair procedure and turn the
+              pole into `being repaired` state.
             </div>
           )}
         </Modal.Body>

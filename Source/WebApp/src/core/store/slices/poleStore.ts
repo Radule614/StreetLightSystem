@@ -1,7 +1,8 @@
 import axios from "axios";
-import { Pole } from "../../../shared";
+import { Pole, extractErrorMessages, notifyErrors } from "../../../shared";
 import { AppState, GetAppState, SetAppState, apiUrl, Request } from "../store";
 import { produce } from "immer";
+import { noCachedDataWarn } from "../../../shared";
 
 export interface PoleStoreType {
   poles: Request<Pole[]>;
@@ -29,6 +30,7 @@ export const poleStore = (
     get().pole.poles.controller?.abort();
     set(
       produce((draft: AppState) => {
+        draft.pole.poles.data = null;
         draft.pole.poles.isLoading = true;
         draft.pole.poles.controller = new AbortController();
         return draft;
@@ -47,6 +49,10 @@ export const poleStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Poles");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -56,7 +62,7 @@ export const poleStore = (
     )
   },
   fetchPoleById: async (id: string) => {
-    if(id === "") return;
+    if (id === "") return;
     get().pole.poleDetails.controller?.abort();
     set(
       produce((draft: AppState) => {
@@ -79,6 +85,10 @@ export const poleStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Pole data");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {

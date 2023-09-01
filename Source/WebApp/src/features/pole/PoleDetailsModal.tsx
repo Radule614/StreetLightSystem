@@ -11,7 +11,8 @@ import {
 import { twMerge } from "tailwind-merge";
 import { Modal } from "flowbite-react";
 import { PoleHistory } from "./PoleHistory";
-import { useNotification } from "../../core/notification";
+import { notification$ } from "../../core/notification";
+import { useSubscription } from "observable-hooks";
 
 export const PoleDetailsModal = ({
   poleId,
@@ -35,13 +36,12 @@ export const PoleDetailsModal = ({
     (state: AppState) => state.repair.fetchPoleHistory
   );
   const team = appStore((state: AppState) => state.auth.team.data)
-  const notification = useNotification();
 
   useEffect(() => {
     fetchPoleById(poleId);
   }, [fetchPoleById, poleId]);
 
-  useEffect(() => {
+  useSubscription(notification$, (notification) => {
     if (
       notification?.action === SuccessActions.StartRepairSuccess ||
       notification?.action === SuccessActions.EndRepairSuccess
@@ -49,7 +49,7 @@ export const PoleDetailsModal = ({
         fetchPoleById(poleId);
         fetchHistory(poleId);
     }
-  }, [fetchPoleById, poleId, notification, fetchHistory]);
+  });
 
   return (
     <Modal

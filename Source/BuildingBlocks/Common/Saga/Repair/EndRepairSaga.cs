@@ -32,6 +32,7 @@ public class EndRepairCommand : ICommand<EndRepairCommandType>
     public RepairData? RepairData { get; set; }
     public EndRepairCommandType Type { get; set; }
     public int? OldPoleStatus { get; set; }
+    public RepairData? OldRepairData { get; set; }
     public EndRepairCommandType UnknownType => EndRepairCommandType.UnknownCommand;
     public EndRepairCommand()
     {
@@ -43,6 +44,7 @@ public class EndRepairCommand : ICommand<EndRepairCommandType>
         RepairData = reply?.RepairData;
         UserId = reply?.UserId;
         OldPoleStatus = reply?.OldPoleStatus;
+        OldRepairData = reply?.OldRepairData;
     }
 }
 
@@ -52,6 +54,7 @@ public class EndRepairReply : IReply<EndRepairReplyType>
     public RepairData? RepairData { get; set; }
     public EndRepairReplyType Type { get; set; }
     public int? OldPoleStatus { get; set; }
+    public RepairData? OldRepairData { get; set; }
     public EndRepairReplyType UnknownType => EndRepairReplyType.UnknownReply;
 
     public EndRepairReply()
@@ -65,5 +68,6 @@ public class EndRepairReply : IReply<EndRepairReplyType>
         RepairData = command?.RepairData;
         UserId = command?.UserId;
         OldPoleStatus = command?.OldPoleStatus;
+        OldRepairData = command?.OldRepairData;
     }
 }

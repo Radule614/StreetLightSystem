@@ -15,7 +15,7 @@ using Common.Notification;
 namespace User.API.Domain.Services;
 
 public class UpdateUserSagaHandler
-: SagaHandler<UpdateUserSagaHandler, UpdateUserCommand, UpdateUserReply, UpdateUserCommandType, UpdateUserReplyType>
+    : SagaHandler<UpdateUserSagaHandler, UpdateUserCommand, UpdateUserReply, UpdateUserCommandType, UpdateUserReplyType>
 {
     private readonly INotificationClient _notificationClient;
     private readonly IMapper _mapper;

@@ -14,7 +14,7 @@ using Repair.API.Infrastructure.Data;
 namespace Repair.API.Domain.Services;
 
 public class StartRepairSagaHandler
-: SagaHandler<StartRepairSagaHandler, StartRepairCommand, StartRepairReply, StartRepairCommandType, StartRepairReplyType>
+    : SagaHandler<StartRepairSagaHandler, StartRepairCommand, StartRepairReply, StartRepairCommandType, StartRepairReplyType>
 {
     private readonly INotificationClient _notificationClient;
     private readonly IMapper _mapper;
@@ -50,6 +50,8 @@ public class StartRepairSagaHandler
     private async Task<StartRepairReply> StartRepair(StartRepairCommand command)
     {
         using var scope = _serviceProvider.CreateScope();
+        await using var dbContext = scope.ServiceProvider.GetRequiredService<RepairContext>();
+        var repairRepository = new RepairRepository(dbContext);
         using var repairService = scope.ServiceProvider.GetRequiredService<IRepairService>();
         var reply = new StartRepairReply(command);
         var data = command.RepairData;
@@ -59,6 +61,10 @@ public class StartRepairSagaHandler
             if (data == null)
             {
                 throw new InvalidArgumentException(nameof(command.RepairData), "null", "Repair Data Object");
+            }
+            if (await repairRepository.FirstOrDefaultAsync(new PoleNotFinishedSpecification(data.PoleId)) != null)
+            {
+                throw new RepairAlreadyInProgressException(data.PoleId);
             }
             var repair = await repairService.Create(data.PoleId);
             reply.RepairData = _mapper.Map<RepairData>(repair);

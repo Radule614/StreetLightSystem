@@ -16,10 +16,11 @@ public class UserContext : DbContext
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        var hashedPassword = PasswordValidator.HashPassword("12345678abc");
+        var hashedPassword = PasswordValidator.HashPassword("12341234abc");
         var id1 = Guid.Parse("4e7e4d2a-bdad-4e2c-9103-fb89d08c70f2");
         var id2 = Guid.Parse("1af3c2c3-3bf2-47cf-908b-6dc20fb678b2");
         var id3 = Guid.Parse("93ce4690-1c6a-41df-b701-1aa7c6ecaa25");
+        var id4 = Guid.Parse("eeca6b6e-f5e8-4ac6-b9a5-7a8b21d0a8a3");
         List<UserEntity> users = new()
         {
             new UserEntity
@@ -28,11 +29,15 @@ public class UserContext : DbContext
             },
             new UserEntity
             {
-                Id = id2, Email = "marko@gmail.com", FirstName = "Marko", LastName = "Uljarevic", Password = hashedPassword
+                Id = id2, Email = "marko@gmail.com", FirstName = "Marko", LastName = "Markovic", Password = hashedPassword
             },
             new UserEntity
             {
-                Id = id3, Email = "darko@gmail.com", FirstName = "Darko", LastName = "Selakovic", Password = hashedPassword
+                Id = id3, Email = "ivan@gmail.com", FirstName = "Ivan", LastName = "Ivanovic", Password = hashedPassword
+            },
+            new UserEntity
+            {
+                Id = id4, Email = "milan@gmail.com", FirstName = "Milan", LastName = "Milanovic", Password = hashedPassword
             }
         };
         Dictionary<string, Role> roles = InitRoles(builder);
@@ -56,7 +61,8 @@ public class UserContext : DbContext
                         new { UserId = users[0].Id, RoleId = roles["User"].Id },
                         new { UserId = users[0].Id, RoleId = roles["Admin"].Id },
                         new { UserId = users[1].Id, RoleId = roles["User"].Id },
-                        new { UserId = users[2].Id, RoleId = roles["User"].Id });
+                        new { UserId = users[2].Id, RoleId = roles["User"].Id },
+                        new { UserId = users[3].Id, RoleId = roles["User"].Id });
                 });
 
         base.OnModelCreating(builder);

@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { Repair, extractErrorMessages, notifyErrors } from "../../../shared";
+import { Repair, extractErrorMessages, noCachedDataWarn, notifyErrors, requestCachedWarning } from "../../../shared";
 import { SetAppState, GetAppState, Request, AppState, apiUrl } from "../store";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -29,12 +29,11 @@ export const repairStore = (
     errors: []
   },
   fetchTeamHistory: async (teamId: string) => {
-    if(teamId === "") return;
-    if (get().repair.teamHistory.controller?.abort) {
-      get().repair.teamHistory.controller?.abort();
-    }
+    if (teamId === "") return;
+    get().repair.teamHistory.controller?.abort();
     set(
       produce((draft: AppState) => {
+        draft.repair.teamHistory.data = null;
         draft.repair.teamHistory.isLoading = true;
         draft.repair.teamHistory.controller = new AbortController();
         return draft;
@@ -53,7 +52,10 @@ export const repairStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
-      notifyErrors(extractErrorMessages(error))
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Team repair history");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -63,12 +65,11 @@ export const repairStore = (
     )
   },
   fetchPoleHistory: async (poleId: string) => {
-    if(poleId === "") return;
-    if (get().repair.poleHistory.controller?.abort) {
-      get().repair.poleHistory.controller?.abort();
-    }
+    if (poleId === "") return;
+    get().repair.poleHistory.controller?.abort();
     set(
       produce((draft: AppState) => {
+        draft.repair.poleHistory.data = null;
         draft.repair.poleHistory.isLoading = true;
         draft.repair.poleHistory.controller = new AbortController();
         return draft;
@@ -87,7 +88,10 @@ export const repairStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
-      notifyErrors(extractErrorMessages(error))
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Pole repair history");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -101,7 +105,10 @@ export const repairStore = (
       await axios.post(`${apiUrl}/repair/start`, { poleId })
       toast.info("Repair data sent.")
     } catch (error: any) {
-      notifyErrors(extractErrorMessages(error))
+      if (error.code === "ERR_NETWORK")
+        requestCachedWarning("Start repair process");
+      else
+        notifyErrors(extractErrorMessages(error))
       throw error
     }
   },
@@ -110,7 +117,10 @@ export const repairStore = (
       await axios.put(`${apiUrl}/repair/end`, { repairId, success })
       toast.info("Repair data sent.")
     } catch (error: any) {
-      notifyErrors(extractErrorMessages(error))
+      if (error.code === "ERR_NETWORK")
+        requestCachedWarning("End repair process");
+      else
+        notifyErrors(extractErrorMessages(error))
       throw error
     }
   },

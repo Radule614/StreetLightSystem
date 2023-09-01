@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { User, extractErrorMessages, notifyErrors } from "../../../shared";
+import { User, extractErrorMessages, noCachedDataWarn, notifyErrors } from "../../../shared";
 import { AppState, GetAppState, Request, SetAppState, apiUrl } from "../store";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -42,6 +42,7 @@ export const userStore = (
     set(
       produce((draft: AppState) => {
         draft.user.users.isLoading = true;
+        draft.user.users.data = null;
         draft.user.users.controller = new AbortController();
         return draft;
       })
@@ -59,6 +60,10 @@ export const userStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Users");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -90,6 +95,10 @@ export const userStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("User data");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {

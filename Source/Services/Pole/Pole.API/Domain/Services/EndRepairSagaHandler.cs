@@ -13,7 +13,7 @@ using Pole.API.Infrastructure.Data;
 namespace Pole.API.Domain.Services;
 
 public class EndRepairSagaHandler
-: SagaHandler<EndRepairSagaHandler, EndRepairCommand, EndRepairReply, EndRepairCommandType, EndRepairReplyType>
+    : SagaHandler<EndRepairSagaHandler, EndRepairCommand, EndRepairReply, EndRepairCommandType, EndRepairReplyType>
 {
     private readonly INotificationClient _notificationClient;
     public EndRepairSagaHandler(IConfiguration configuration, ILogger<EndRepairSagaHandler> logger, IServiceProvider serviceProvider)

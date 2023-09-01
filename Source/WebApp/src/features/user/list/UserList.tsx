@@ -12,8 +12,9 @@ import {
 import { AppState, appStore } from "../../../core/store";
 import { useEffect, useState } from "react";
 import { MessageModal } from "./MessageModal";
-import { useNotification } from "../../../core/notification";
 import { useNavigate } from "react-router-dom";
+import { notification$ } from "../../../core/notification";
+import { useSubscription } from "observable-hooks";
 
 export const UserList = () => {
   const users = appStore((state: AppState) => state.user.users.data);
@@ -23,7 +24,6 @@ export const UserList = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isMessageDialogOpen, setMessageDialogOpen] = useState(false);
-  const notification = useNotification();
   const navigate = useNavigate();
 
   const handleDelete = (user: User) => {
@@ -40,11 +40,11 @@ export const UserList = () => {
     fetchUsers();
   }, [fetchUsers]);
 
-  useEffect(() => {
+  useSubscription(notification$, (notification) => {
     if (notification?.action === SuccessActions.DeleteUserSuccess) {
       fetchUsers();
     }
-  }, [fetchUsers, notification]);
+  });
 
   const getActions = (user: User): DropdownAction[] => [
     {

@@ -103,7 +103,6 @@ export const authStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
-      notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -136,7 +135,6 @@ export const authStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
-      //notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -159,5 +157,7 @@ export const authStore = (
     get().notification.clearData();
     get().team.clearData();
     get().repair.clearData();
+
+    caches.delete("notificationList")
   }
 })

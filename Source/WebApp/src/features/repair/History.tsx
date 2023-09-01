@@ -8,11 +8,11 @@ import {
   SuccessActions,
   convertDate,
   tableContentStyles,
-  tableHeaderStyles,
-} from "../../shared";
+  tableHeaderStyles} from "../../shared";
 import { useEffect, useState } from "react";
 import { EndRepairModal } from "./EndRepairModal";
-import { useNotification } from "../../core/notification";
+import { notification$ } from "../../core/notification";
+import { useSubscription } from "observable-hooks";
 
 export const History = () => {
   const history = appStore((state: AppState) => state.repair.teamHistory.data);
@@ -25,8 +25,6 @@ export const History = () => {
   const userTeam = appStore((state: AppState) => state.auth.team.data);
   const [repairId, setRepairId] = useState<string | null>(null);
   const [isRepairVisible, setRepairVisible] = useState(false);
-  const notification = useNotification();
-
   const getActions = (repair: Repair): DropdownAction[] => [
     {
       id: "FinishRepair",
@@ -54,11 +52,11 @@ export const History = () => {
     );
   };
 
-  useEffect(() => {
+  useSubscription(notification$, (notification) => {
     if (notification?.action === SuccessActions.EndRepairSuccess) {
       fetchHistory(userTeam?.id ?? "");
     }
-  }, [fetchHistory, notification, userTeam?.id]);
+  });
 
   return (
     <div>

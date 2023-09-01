@@ -13,7 +13,7 @@ using Team.API.Domain.Exceptions;
 namespace Team.API.Domain.Services;
 
 public class StartRepairSagaHandler
-: SagaHandler<StartRepairSagaHandler, StartRepairCommand, StartRepairReply, StartRepairCommandType, StartRepairReplyType>
+    : SagaHandler<StartRepairSagaHandler, StartRepairCommand, StartRepairReply, StartRepairCommandType, StartRepairReplyType>
 {
     private readonly INotificationClient _notificationClient;
     public StartRepairSagaHandler(IConfiguration configuration, ILogger<StartRepairSagaHandler> logger, IServiceProvider serviceProvider)

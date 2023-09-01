@@ -5,7 +5,6 @@ import {
   RepairIcon,
   TeamIcon,
   UsersIcon,
-  SettingsIcon,
   InboxIcon,
 } from "./Icon";
 import { NavigationSection } from "./NavigationSection";
@@ -24,11 +23,6 @@ const UserRoutes: NavRoute[] = [
     icon: <PoleIcon />,
   },
   {
-    value: "Settings",
-    link: "/settings",
-    icon: <SettingsIcon />,
-  },
-  {
     value: "Inbox",
     link: "/inbox",
     icon: <InboxIcon />,
@@ -41,7 +35,7 @@ const TeamRoutes: NavRoute[] = [
     link: "/repair",
     icon: <RepairIcon />,
   },
-]
+];
 
 const AdminRoutes: NavRoute[] = [
   {
@@ -62,9 +56,7 @@ export const Navigation = () => {
   return (
     <div className="px-4">
       <NavigationSection routes={UserRoutes} title="Navigation" />
-      {team && (
-        <NavigationSection routes={TeamRoutes} title="Team" />
-      )}
+      {team && <NavigationSection routes={TeamRoutes} title="Team" />}
       {getActiveRole(userData)?.name === "Admin" && (
         <NavigationSection routes={AdminRoutes} title="Admin" />
       )}

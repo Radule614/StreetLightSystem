@@ -28,8 +28,8 @@ export const getStepsBetweenMapPoints = async ({ source, destination }: { source
 }
 
 export const extractErrorMessages = (error: any): string[] => {
-  const e = error.response.data
-  if (e.message) {
+  const e = error.response ? error.response.data : {}
+  if (e && e.message) {
     return e.message.split(";")
   }
   return error.message ? [error.message] : []
@@ -37,6 +37,17 @@ export const extractErrorMessages = (error: any): string[] => {
 
 export const notifyErrors = (errors: string[]) => {
   errors.forEach(e => toast.error(e))
+}
+
+export const noCachedDataWarn = (dataType: string) => {
+  toast.warn(`Unable to find cached data. Data type: ${dataType}`, { autoClose: false });
+}
+
+export const requestCachedWarning = (requestType: string) => {
+  toast.warn(
+    `Request has been cached and will be resent once online again! Request type: ${requestType}`,
+    { autoClose: false }
+  )
 }
 
 export const getActiveRole = (userData: User | null): Role | undefined => {

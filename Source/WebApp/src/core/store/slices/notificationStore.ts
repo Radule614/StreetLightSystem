@@ -2,6 +2,7 @@ import { produce } from "immer";
 import { Message, extractErrorMessages, notifyErrors } from "../../../shared";
 import { AppState, GetAppState, Request, SetAppState, apiUrl } from "../store";
 import axios from "axios";
+import { noCachedDataWarn } from "../../../shared";
 
 export interface NotificationStoreType {
   messages: Request<Message[]>;
@@ -23,6 +24,7 @@ export const notificationStore = (
     get().notification.messages.controller?.abort();
     set(
       produce((draft: AppState) => {
+        draft.notification.messages.data = null;
         draft.notification.messages.isLoading = true;
         draft.notification.messages.controller = new AbortController();
         return draft;
@@ -41,6 +43,10 @@ export const notificationStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Messages");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -53,7 +59,7 @@ export const notificationStore = (
     try {
       await axios.get(`${apiUrl}/notification/unsent`)
     } catch (error: any) {
-      if(error?.response?.status !== 401)
+      if (error?.response?.status !== 401)
         notifyErrors(extractErrorMessages(error))
     }
   },

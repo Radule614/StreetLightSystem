@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { Member, Team, extractErrorMessages, notifyErrors } from "../../../shared";
+import { Member, Team, extractErrorMessages, noCachedDataWarn, notifyErrors } from "../../../shared";
 import { AppState, GetAppState, Request, SetAppState, apiUrl } from "../store";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -46,6 +46,7 @@ export const teamStore = (
     set(
       produce((draft: AppState) => {
         draft.team.teams.isLoading = true;
+        draft.team.teams.data = null;
         draft.team.teams.controller = new AbortController();
         return draft;
       })
@@ -63,6 +64,10 @@ export const teamStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Teams");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -76,6 +81,7 @@ export const teamStore = (
     set(
       produce((draft: AppState) => {
         draft.team.members.isLoading = true;
+        draft.team.members.data = null;
         draft.team.members.controller = new AbortController();
         return draft;
       })
@@ -93,6 +99,10 @@ export const teamStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Team members");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
@@ -124,6 +134,10 @@ export const teamStore = (
     } catch (error: any) {
       if (axios.isCancel(error))
         return;
+      if (error.code === "ERR_NETWORK")
+        noCachedDataWarn("Team data");
+      else
+        notifyErrors(extractErrorMessages(error))
     }
     set(
       produce((draft: AppState) => {
